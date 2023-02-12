@@ -1,0 +1,185 @@
+. env/Scripts/activate --> use thisto activate the environment
+Super User-->srkramoji@gmail.com
+Password -->Ram@9949
+
+
+20. create a custom user model
+
+By default django uses two models
+1) user model
+2) user manager --> manages all the users
+
+lets start by creating an app--> named accounts
+python manage.py startapp accounts
+add it in IMSTALLED_APPS in settings.py
+
+then in models.py
+create two models as mentioned above
+
+1) class UserManager(): --> this should not have any fields declared just a method to create users and super users
+
+2) class User(): --> this can have fields
+
+        user.save(using=self._db) --> this is tell in which db u wanat to save the user details. If there are more then 1 db using fro the project
+	  email = self.normalize_email(email), -->This is gonna normaliE your email--> converts to lower chars
+
+
+Here BaseUserManager allows us to create normal user and superuser and also to normalize the email
+
+AbstractBaseUser --> by using this we take the full control of custom user model including authentication functionality
+	The same functionlaity can be done by using abstractuser but in that case we wont get all the fucntionalities only we can add extra fields
+
+An example is by using AbstractBaseUser if we want to change the authentication functioanlity from username to email we can do but not with AbstarctUser
+
+
+These two functions are mandatory to use
+    def has_perm(self,perm, obj=None):  --> default value
+        return self.is_admin
+    
+    def has_module_perm(self,app_lable): --> for admin and super admin user it is set to true
+        return True
+
+
+By now we have created user and super user
+
+Still there are two more activities to do
+
+1)  we have to tell user class which user manager we are using so 
+-->add  objects= UserManager() which is the class name in models.py
+
+2) Since we are not using default super user 
+we have to inform that we gonna create our own
+
+AUTH_USER_MODEL ='accounts.User' --> this is becasue our User class is in the accounts(the app name) in settings.py
+		This is yo inform that we are using custom user module	
+
+
+Now we have to migrate the changes and run the project but now it will throw an error because there is already a default user table created and if we create another it will be a confict.
+
+--> auth_user table is created when we migrate the chnages earleir
+
+python manage.py makemigrations
+python manage.py migrate 
+--> raise InconsistentMigrationHistory(  an error is thrown
+
+since there is a conflict lets remove the migrations file first ( 0001_initial.py)
+
+then drop the database from postgresql
+
+since we have already named the db as foodOnline_db 
+1)create the same database or change the name and create another databse in postgre 
+	NOTE: Only the database is created not tables
+2)now make the migrations
+a new user will be created
+
+Now a table will be created.
+
+Now its time to create a super user
+python manage.py runserver
+--> if you could see only groups is visible in the page.
+Not users to do that
+Go to admin.py import Users
+admin.site.register(User) --> Here User is the model we want to use
+
+=============
+=================
+=========================
+now if you go inside users you could see the user created(which is the super user)
+Inside it the password field is editable but that should not be the case.
+
+To do that have to import UserAdmin to your admin.py class
+and create a class called CustomeUserAdmin(UserAdmin)
+
+and check the content in admin.py
+
+the important step is to add that class name to admin.site.register(User,CustomerUserAdmin)
+
+===================================================================
+User Profile Model
+create a model for user 
+
+Now all the fields are set and while saving it throws an error stating that we need pillow 
+This is because pillow is req if using ImageField
+
+
+
+Now we have created a model for UserProfile
+
+
+To see the userprofile visible in admin page
+in admin.py -->admin.site.register(UserProfile)
+
+
+But the main intension is we should have to maintain user profile for all the users automatically
+As of now for the existing super user we have manually created profile and submitted but while trying to retrieve the photos submitted for that user it throws an error because we haven't added media files
+
+create a folder named media
+add in settings.py
+
+then in urls.py
+
+from django.conf
+from django.conf.urls.
+
+
+append this line to urlpatterns
+ +static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+By doing so we have setup the configuration for media files
+
+=====================================
+31) User registration implementation
+
+if form.is_valid():
+	user=form.save(commit=False) --> this is to indicate that we are assigning the value to some object
+	user.role=User.Customer      --> because we want to assign other values to the user model
+	user.save()
+	return redirect('registerUser')
+
+To raise any non field error
+--> in forms.py
+		--> if password!=confirm_password:
+				raise forms.ValidationError("Passwords do not match")
+		if password == "a":
+				raise forms.ValidationError("Password should not be a")
+		--> similarily write for all the required confiditons
+then in html page
+			<li style="color: red">
+                      {{form.non_field_errors}}
+                    </li>
+		-->The above lines shows the error statements
+
+===========================================================
+34) 
+In views.py --> after form is submiteed and registered successfully
+from django.contrib import messages
+
+messages.success(request,"your account has been registreed successfully")
+
+ 				  {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-success" role="alert">                        
+                              {{message}}
+                            </div>
+                            {% endfor %}
+                          {% endif %}  
+---> all the messages are stores with the help of context_processors.messages present in context_processors inside settings
+					To close the message in  html page
+  <button type="button" class="close" data-dismiss="alert" aria-label="close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+------------
+add animation for mesages --> add custom.css in html
+also add class name to the msg field in alerts.html
+and finally display it.
+=======================================================
+if you want to change the color of it --> it can be done easily
+add in settings.html
+
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS={
+    messages.ERROR: 'danger';
+
+}
+
+
