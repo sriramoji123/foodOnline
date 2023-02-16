@@ -182,4 +182,28 @@ MESSAGE_TAGS={
 
 }
 
+==================================
+=============================================
+=============================================================
+38)Vendor Model
+
+Create a model for vendor --> restaurant
+once all the fields are written it is mandatory to register your model in admin.py --> only then we can see that in admin page to add or delte.
+and to put your app name in installed_apps of settings.py
+Once the model is created run python manage.py makemigrations & python manage.py migrate
+
+
+
+39) Vendor Registration TEMPLATE
+Just create a url which calls regiserVendor() and renders to registerVendor html page
+If you see in this case you would just find the fields of User but not Vendor also not any forms because we haven't created an form yet for Vendor
+
+
+40) Vendor Registration Feature
+make the change in navbar.html so that on clicking register Restaurant it redirects to registerVendor Page
+Here in the vendor form we are using all the fields of User. so we can make use of existing form and create new form for Vendor with only two fields
+Since the registervendor template already has account fields just add the v_form.vendor_name, v_form.vendor_license
+and change the url of form submission and it is mandatory to set 
+enctype="multipart/form-data" while using input file/image
+Vendor--> takes User and userprofile as its attribute. So before saving vendor form it is mandatory to save a user and pass it to vendor.
 
